@@ -67,7 +67,7 @@ variable "node_instance_type" {
 variable "node_desired_size" {
   description = "Desired number of worker nodes"
   type        = number
-  default     = 3
+  default     = 1
 
   validation {
     condition     = var.node_desired_size >= 1 && var.node_desired_size <= 100
@@ -78,7 +78,7 @@ variable "node_desired_size" {
 variable "node_min_size" {
   description = "Minimum number of worker nodes"
   type        = number
-  default     = 2
+  default     = 1
 
   validation {
     condition     = var.node_min_size >= 1 && var.node_min_size <= 100
@@ -89,7 +89,7 @@ variable "node_min_size" {
 variable "node_max_size" {
   description = "Maximum number of worker nodes"
   type        = number
-  default     = 5
+  default     = 2
 
   validation {
     condition     = var.node_max_size >= 1 && var.node_max_size <= 100
@@ -97,32 +97,10 @@ variable "node_max_size" {
   }
 }
 
-variable "ecr_repositories" {
-  description = "List of ECR repositories to reference"
-  type        = list(string)
-  default = [
-    "adservice",
-    "cartservice",
-    "checkoutservice",
-    "currencyservice",
-    "emailservice",
-    "frontend",
-    "paymentservice",
-    "productcatalogservice",
-    "recommendationservice",
-    "shippingservice"
-  ]
-
-  validation {
-    condition     = length(var.ecr_repositories) > 0
-    error_message = "At least one ECR repository name must be specified."
-  }
-}
-
 variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
-  default     = 30
+  default     = 7
 
   validation {
     condition     = contains([1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653], var.log_retention_days)
@@ -134,7 +112,10 @@ variable "tags" {
   description = "Common tags for all resources"
   type        = map(string)
   default = {
-    Project   = "Microservices"
-    ManagedBy = "Terraform"
+    Project      = "Microservices"
+    ManagedBy    = "Terraform"
+    Owner        = "Mohamed Fayad"
+    CostCenter   = "Engineering"
+    BillingAlarm = "true"
   }
 }

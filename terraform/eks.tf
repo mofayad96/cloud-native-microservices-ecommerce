@@ -7,14 +7,12 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
 
-  vpc_id                               = module.vpc.vpc_id
-  subnet_ids                           = module.vpc.private_subnets
-  cluster_endpoint_public_access       = true
-  cluster_endpoint_private_access      = true
-  cluster_endpoint_public_access_cidrs = ["0.0.0.0/0"] # Restrict this in production
+  vpc_id                          = module.vpc.vpc_id
+  subnet_ids                      = module.vpc.private_subnets
+  cluster_endpoint_public_access  = false
+  cluster_endpoint_private_access = true
 
-
-  manage_aws_auth_configmap = false
+  manage_aws_auth_configmap = true
 
 
   create_cloudwatch_log_group = true
@@ -28,7 +26,7 @@ module "eks" {
 
   # Managed node group defaults
   eks_managed_node_group_defaults = {
-    ami_type       = "AL2_x86_64"
+    ami_type       = "AL2023_x86_64_STANDARD"
     instance_types = [var.node_instance_type]
     disk_size      = 50
     capacity_type  = "ON_DEMAND"

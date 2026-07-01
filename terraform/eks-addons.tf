@@ -9,7 +9,7 @@ resource "aws_eks_addon" "coredns" {
 
   tags = local.common_tags
 
-  depends_on = [module.eks.cluster_id]
+  depends_on = [module.eks.cluster_name]
 }
 
 data "aws_eks_addon_version" "coredns" {
@@ -29,7 +29,7 @@ resource "aws_eks_addon" "kube_proxy" {
 
   tags = local.common_tags
 
-  depends_on = [module.eks.cluster_id]
+  depends_on = [module.eks.cluster_name]
 }
 
 data "aws_eks_addon_version" "kube_proxy" {
@@ -50,7 +50,7 @@ resource "aws_eks_addon" "vpc_cni" {
 
   tags = local.common_tags
 
-  depends_on = [module.vpc_cni_irsa, module.eks.cluster_id]
+  depends_on = [module.vpc_cni_irsa, module.eks.cluster_name]
 }
 
 data "aws_eks_addon_version" "vpc_cni" {
@@ -91,7 +91,7 @@ resource "aws_eks_addon" "ebs_csi_driver" {
 
   tags = local.common_tags
 
-  depends_on = [module.ebs_csi_irsa, module.eks.cluster_id]
+  depends_on = [module.ebs_csi_irsa, module.eks.cluster_name]
 }
 
 data "aws_eks_addon_version" "ebs_csi" {
