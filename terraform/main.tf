@@ -8,19 +8,19 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.0"
+      version = ">= 2.10.0"
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "~> 4.0"
+      version = ">= 3.0.0"
     }
     time = {
       source  = "hashicorp/time"
-      version = "~> 0.9"
+      version = ">= 0.9.0"
     }
     cloudinit = {
       source  = "hashicorp/cloudinit"
-      version = "~> 2.3"
+      version = ">= 2.0.0"
     }
   }
 }
