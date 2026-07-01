@@ -18,6 +18,8 @@ data:
   SHOPPING_ASSISTANT_SERVICE_ADDR: "shoppingassistantservice-service.microservices.svc.cluster.local:8083"
   REDIS_ADDR: "redis-service.microservices.svc.cluster.local:6379"
   
+  COLLECTOR_SERVICE_ADDR: "otel-collector.microservices.svc.cluster.local:4317"
+
   # Observability
   DISABLE_PROFILER: "1"
   ENABLE_TRACING: "1"

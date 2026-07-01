@@ -88,6 +88,11 @@ spec:
             configMapKeyRef:
               name: microservices-config
               key: ENABLE_TRACING
+        - name: COLLECTOR_SERVICE_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: COLLECTOR_SERVICE_ADDR
         - name: OTEL_SERVICE_NAME
           value: "frontend"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT

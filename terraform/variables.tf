@@ -20,6 +20,18 @@ variable "cluster_name" {
   }
 }
 
+variable "cluster_endpoint_public_access" {
+  description = "Enable public access to the EKS cluster API endpoint"
+  type        = bool
+  default     = true
+}
+
+variable "cluster_endpoint_public_access_cidrs" {
+  description = "CIDR blocks allowed to access the public EKS API endpoint"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "cluster_version" {
   description = "Kubernetes version for EKS cluster"
   type        = string
