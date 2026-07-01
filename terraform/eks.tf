@@ -16,8 +16,15 @@ module "eks" {
 
   manage_aws_auth_configmap = false
 
-  
-  create_cloudwatch_log_group = false
+
+  create_cloudwatch_log_group = true
+
+  # Cluster secret encryption
+  create_kms_key = false
+  cluster_encryption_config = {
+    resources        = ["secrets"]
+    provider_key_arn = aws_kms_key.eks.arn
+  }
 
   # Managed node group defaults
   eks_managed_node_group_defaults = {
@@ -82,7 +89,7 @@ module "eks" {
   }
   cluster_addons = {} # Addons managed separately in eks-addons.tf
 
- 
+
   cluster_enabled_log_types = local.eks_log_types
 
   tags = merge(

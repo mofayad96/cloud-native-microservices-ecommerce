@@ -1,12 +1,11 @@
-# Common configuration for all microservices
-# This file contains ConfigMaps and other shared resources
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: microservices-config
   namespace: microservices
 data:
-  # Service discovery - services use these addresses to communicate
+
   PRODUCT_CATALOG_SERVICE_ADDR: "productcatalog-service.microservices.svc.cluster.local:3550"
   SHIPPING_SERVICE_ADDR: "shippingservice-service.microservices.svc.cluster.local:50052"
   CURRENCY_SERVICE_ADDR: "currencyservice-service.microservices.svc.cluster.local:7000"

@@ -1,7 +1,6 @@
 # Docker Compose Documentation and Setup Files
 
 README-docker-compose.md
-Makefile
 check-services.sh
 SETUP-COMPLETE.md
 
@@ -35,21 +34,3 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
-# Ignore everything in these folders
-
-
-# Ignore these files
-check-services.sh
-CLEANUP_AND_DEPLOYMENT*.md
-DEPLOYMENT_FIXES_SUMMARY*.md
-docker-compose.dev.yml
-docker-compose.yml
-ec2 describe-network-interface*
-ecr describe-repositories*
-K8S_CHANGES_SUMMARY.md
-last
-leep 60
-SETUP_COMPLETE.md
-SETUP_GUIDE.md
-TERRAFORM_FIX_GUIDE.md
-INTERVIEW.md

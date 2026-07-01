@@ -19,6 +19,8 @@ AWS_REGION=${AWS_REGION:-eu-central-1}
 NAMESPACE="microservices"
 COMPUTE_MODE=${COMPUTE_MODE:-ec2}
 IMAGE_TAG=${IMAGE_TAG:-latest}
+USE_IRSA_FOR_ECR=${USE_IRSA_FOR_ECR:-false}
+IRSA_ECR_ROLE_ARN=${IRSA_ECR_ROLE_ARN:-}
 
 # Functions
 log_info() {
@@ -138,6 +140,23 @@ create_namespace() {
 }
 
 setup_ecr_credentials() {
+    if [[ "$USE_IRSA_FOR_ECR" == "true" ]]; then
+        log_info "Configuring IRSA-based authentication for image access..."
+
+        if [[ -z "$IRSA_ECR_ROLE_ARN" ]]; then
+            log_error "USE_IRSA_FOR_ECR=true requires IRSA_ECR_ROLE_ARN to be set"
+            exit 1
+        fi
+
+        kubectl annotate serviceaccount default \
+          -n "$NAMESPACE" \
+          eks.amazonaws.com/role-arn="$IRSA_ECR_ROLE_ARN" \
+          --overwrite
+
+        log_info "✓ IRSA annotation applied to default service account"
+        return
+    fi
+
     log_info "Setting up ECR credentials..."
     
     # Check if ecr-secret already exists
@@ -229,6 +248,7 @@ main() {
     log_info "Namespace: $NAMESPACE"
     log_info "Compute mode: $COMPUTE_MODE"
     log_info "Image tag: $IMAGE_TAG"
+    log_info "Use IRSA for ECR auth: $USE_IRSA_FOR_ECR"
     echo ""
     
     check_prerequisites

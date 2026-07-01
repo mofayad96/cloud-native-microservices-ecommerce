@@ -18,7 +18,8 @@ spec:
       labels:
         app: checkoutservice
 
-    spec:  
+    spec:
+      serviceAccountName: default
       containers:
       - name: checkoutservice-pod
         image: checkoutservice
@@ -59,6 +60,27 @@ spec:
           value: "none"
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: "service.namespace=microservices,deployment.environment=production"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 2
       imagePullSecrets:
         - name: ecr-secret          
 ---
