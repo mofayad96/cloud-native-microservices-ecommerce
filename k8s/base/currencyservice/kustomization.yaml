@@ -3,3 +3,8 @@ kind: Kustomization
 
 resources:
   - currencyservice-deployment.yaml
+
+images:
+  - name: currencyservice
+    newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/currencyservice
+    newTag: latest

@@ -3,3 +3,8 @@ kind: Kustomization
 
 resources:
   - emailservice-deployment.yaml
+
+images:
+  - name: emailservice
+    newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/emailservice
+    newTag: latest

@@ -86,6 +86,40 @@ check_cluster() {
   log_info "✓ Cluster healthy ($ready_nodes Ready node(s))"
 }
 
+install_lb_controller() {
+  log_step "Phase 3.5: Install AWS Load Balancer Controller"
+
+  if kubectl get deployment -n kube-system aws-load-balancer-controller &>/dev/null; then
+    log_info "AWS Load Balancer Controller already installed, skipping"
+    return
+  fi
+
+  helm repo add eks https://aws.github.io/eks-charts 2>/dev/null || true
+  helm repo update eks 2>/dev/null
+
+  local role_arn vpc_id
+  role_arn=$(cd "$SCRIPT_DIR/terraform" && terraform output -raw lb_controller_role_arn 2>/dev/null)
+  vpc_id=$(cd "$SCRIPT_DIR/terraform" && terraform output -raw vpc_id 2>/dev/null)
+
+  if [[ -z "$role_arn" ]]; then
+    log_error "Could not get LB Controller IAM role ARN from Terraform output"
+    return 1
+  fi
+
+  helm upgrade --install aws-load-balancer-controller eks/aws-load-balancer-controller \
+    -n kube-system \
+    --set clusterName="$CLUSTER_NAME" \
+    --set serviceAccount.create=true \
+    --set serviceAccount.name=aws-load-balancer-controller \
+    --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"="$role_arn" \
+    --set region="$AWS_REGION" \
+    --set vpcId="$vpc_id"
+
+  log_info "Waiting for LBC to be ready..."
+  kubectl rollout status deployment -n kube-system aws-load-balancer-controller --timeout=180s
+  log_info "✓ AWS Load Balancer Controller ready"
+}
+
 verify_ecr_images() {
   log_info "Verifying ECR images (tag: $IMAGE_TAG)..."
 
@@ -144,11 +178,16 @@ print_summary() {
   echo "Services:"
   kubectl get services -n "$NAMESPACE" 2>/dev/null || echo "  (none)"
 
-  local frontend_url
-  frontend_url=$(kubectl get svc frontend-external -n "$NAMESPACE" \
+  local frontend_url ingress_url
+  frontend_url=$(kubectl get svc frontend-service -n "$NAMESPACE" \
     -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
   if [[ -n "$frontend_url" ]]; then
-    echo -e "\n${GREEN}Frontend:${NC} http://$frontend_url"
+    echo -e "\n${GREEN}Frontend (LoadBalancer):${NC} http://$frontend_url:8080"
+  fi
+  ingress_url=$(kubectl get ingress frontend-ingress -n "$NAMESPACE" \
+    -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || echo "")
+  if [[ -n "$ingress_url" ]]; then
+    echo -e "\n${GREEN}Frontend (ALB Ingress):${NC} http://$ingress_url"
   fi
 
   echo -e "\n${GREEN}To configure kubectl:${NC}"
@@ -170,6 +209,7 @@ main() {
   if [[ "$SKIP_K8S" != "true" ]]; then
     validate_manifests
     check_cluster
+    install_lb_controller
     verify_ecr_images
     deploy_microservices
     print_summary

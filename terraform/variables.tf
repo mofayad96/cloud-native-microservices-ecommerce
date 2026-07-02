@@ -79,7 +79,7 @@ variable "node_instance_type" {
 variable "node_desired_size" {
   description = "Desired number of worker nodes"
   type        = number
-  default     = 1
+  default     = 2
 
   validation {
     condition     = var.node_desired_size >= 1 && var.node_desired_size <= 100
@@ -90,7 +90,7 @@ variable "node_desired_size" {
 variable "node_min_size" {
   description = "Minimum number of worker nodes"
   type        = number
-  default     = 1
+  default     = 2
 
   validation {
     condition     = var.node_min_size >= 1 && var.node_min_size <= 100
@@ -101,7 +101,7 @@ variable "node_min_size" {
 variable "node_max_size" {
   description = "Maximum number of worker nodes"
   type        = number
-  default     = 2
+  default     = 4
 
   validation {
     condition     = var.node_max_size >= 1 && var.node_max_size <= 100

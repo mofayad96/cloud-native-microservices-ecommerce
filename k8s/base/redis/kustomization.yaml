@@ -3,3 +3,8 @@ kind: Kustomization
 
 resources:
   - redis-deployment.yaml
+
+images:
+  - name: redis
+    newName: redis
+    newTag: 7-alpine

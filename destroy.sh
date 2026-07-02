@@ -53,6 +53,8 @@ delete_k8s_resources() {
 
   log_info "Cleaning remaining resources in kube-system..."
   kubectl delete secret ecr-secret -n kube-system 2>/dev/null || true
+  kubectl delete deployment aws-load-balancer-controller -n kube-system 2>/dev/null || true
+  kubectl delete serviceaccount aws-load-balancer-controller -n kube-system 2>/dev/null || true
 }
 
 destroy_terraform() {
