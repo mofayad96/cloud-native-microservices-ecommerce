@@ -6,13 +6,13 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-  microservices-golden-signals.json: |
+  microservices-overview.json: |
     {
       "__inputs": [],
       "__requires": [],
-      "title": "Microservices Golden Signals",
-      "uid": "microservices-golden-signals",
-      "version": 1,
+      "title": "Microservices Overview",
+      "uid": "microservices-overview",
+      "version": 2,
       "schemaVersion": 39,
       "timezone": "browser",
       "editable": true,
@@ -23,8 +23,7 @@ data:
       },
       "timepicker": {},
       "tags": [
-        "microservices",
-        "ecommerce"
+        "microservices"
       ],
       "panels": [
         {
@@ -43,7 +42,7 @@ data:
           "title": "Deployments Ready",
           "gridPos": {
             "h": 4,
-            "w": 4,
+            "w": 3,
             "x": 0,
             "y": 1
           },
@@ -72,7 +71,7 @@ data:
                   },
                   {
                     "color": "green",
-                    "value": 13
+                    "value": 12
                   }
                 ]
               }
@@ -84,8 +83,8 @@ data:
           "title": "Pods Running",
           "gridPos": {
             "h": 4,
-            "w": 4,
-            "x": 4,
+            "w": 3,
+            "x": 3,
             "y": 1
           },
           "targets": [
@@ -100,8 +99,8 @@ data:
           "title": "Pod Restarts (1h)",
           "gridPos": {
             "h": 4,
-            "w": 4,
-            "x": 8,
+            "w": 3,
+            "x": 6,
             "y": 1
           },
           "targets": [
@@ -138,11 +137,11 @@ data:
         },
         {
           "type": "stat",
-          "title": "Services Up",
+          "title": "Services Available",
           "gridPos": {
             "h": 4,
-            "w": 4,
-            "x": 12,
+            "w": 3,
+            "x": 9,
             "y": 1
           },
           "targets": [
@@ -174,7 +173,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"microservices\", container!=\"\"}[5m])) by (container)",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"microservices\", container!=\"\", container!=\"POD\"}[5m])) by (container)",
               "legendFormat": "{{container}}"
             }
           ],
@@ -199,7 +198,7 @@ data:
           },
           "targets": [
             {
-              "expr": "sum(container_memory_working_set_bytes{namespace=\"microservices\", container!=\"\"}) by (container)",
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"microservices\", container!=\"\", container!=\"POD\"}) by (container)",
               "legendFormat": "{{container}}"
             }
           ],
@@ -210,70 +209,6 @@ data:
                 "mode": "continuous-GrYlRd"
               },
               "min": 0
-            }
-          }
-        },
-        {
-          "type": "row",
-          "title": "Application Metrics (OpenTelemetry)",
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 14
-          },
-          "collapsed": false
-        },
-        {
-          "type": "timeseries",
-          "title": "Request Rate (OTel)",
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 15
-          },
-          "targets": [
-            {
-              "expr": "sum(rate(microservices_http_server_request_count{}[5m])) by (service_name)",
-              "legendFormat": "{{service_name}}",
-              "hide": false
-            },
-            {
-              "expr": "sum(rate(microservices_rpc_server_duration_count{}[5m])) by (service_name)",
-              "legendFormat": "{{service_name}} (gRPC)"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "reqps",
-              "color": {
-                "mode": "palette-classic"
-              }
-            }
-          }
-        },
-        {
-          "type": "timeseries",
-          "title": "P95 Latency (OTel)",
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 15
-          },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum(rate(microservices_http_server_duration_bucket{}[5m])) by (le, service_name))",
-              "legendFormat": "{{service_name}}"
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "s",
-              "color": {
-                "mode": "palette-classic"
-              }
             }
           }
         }

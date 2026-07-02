@@ -6,13 +6,13 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-  otel-pipeline-health.json: |
+  otel-collector.json: |
     {
       "__inputs": [],
       "__requires": [],
-      "title": "OTEL Pipeline Health",
-      "uid": "otel-pipeline-health",
-      "version": 1,
+      "title": "OTEL Collector",
+      "uid": "otel-collector",
+      "version": 2,
       "schemaVersion": 39,
       "timezone": "browser",
       "editable": true,
@@ -22,139 +22,87 @@ data:
         "to": "now"
       },
       "tags": [
-        "otel",
-        "observability"
+        "otel"
       ],
       "panels": [
         {
-          "type": "row",
-          "title": "Collector",
+          "type": "stat",
+          "title": "Collector Status",
           "gridPos": {
-            "h": 1,
-            "w": 24,
+            "h": 3,
+            "w": 4,
             "x": 0,
             "y": 0
           },
-          "collapsed": false
-        },
-        {
-          "type": "stat",
-          "title": "Collector Up",
-          "gridPos": {
-            "h": 3,
-            "w": 4,
-            "x": 0,
-            "y": 1
-          },
           "targets": [
             {
-              "expr": "up{job=~\".*otel.*\"}",
-              "legendFormat": "{{job}}"
-            }
-          ]
-        },
-        {
-          "type": "stat",
-          "title": "Metrics Exported (rate)",
-          "gridPos": {
-            "h": 3,
-            "w": 4,
-            "x": 4,
-            "y": 1
-          },
-          "targets": [
-            {
-              "expr": "sum(rate(microservices_otelcol_exporter_sent_metrics_count{}[5m]))"
-            }
-          ]
-        },
-        {
-          "type": "stat",
-          "title": "Spans Received (rate)",
-          "gridPos": {
-            "h": 3,
-            "w": 4,
-            "x": 8,
-            "y": 1
-          },
-          "targets": [
-            {
-              "expr": "sum(rate(microservices_otelcol_receiver_accepted_spans_count{}[5m]))"
-            }
-          ]
-        },
-        {
-          "type": "timeseries",
-          "title": "Exporter Send Latency",
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 4
-          },
-          "targets": [
-            {
-              "expr": "rate(microservices_otelcol_exporter_send_duration_seconds_sum{}[5m]) / rate(microservices_otelcol_exporter_send_duration_seconds_count{}[5m])",
-              "legendFormat": "{{exporter}}"
+              "expr": "up{job=\"otel-collector\"}",
+              "legendFormat": "Collector"
             }
           ],
           "fieldConfig": {
             "defaults": {
-              "unit": "s"
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": null
+                  },
+                  {
+                    "color": "green",
+                    "value": 1
+                  }
+                ]
+              }
             }
           }
         },
         {
           "type": "timeseries",
-          "title": "Receiver Accepted / Refused",
+          "title": "Traces Received (from Collector logs)",
           "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 4
-          },
-          "targets": [
-            {
-              "expr": "sum(rate(microservices_otelcol_receiver_accepted_spans_count{}[5m])) by (receiver)",
-              "legendFormat": "accepted {{receiver}}"
-            },
-            {
-              "expr": "sum(rate(microservices_otelcol_receiver_refused_spans_count{}[5m])) by (receiver)",
-              "legendFormat": "refused {{receiver}}"
-            }
-          ]
-        },
-        {
-          "type": "timeseries",
-          "title": "Processor Batch Size",
-          "gridPos": {
-            "h": 8,
+            "h": 6,
             "w": 12,
             "x": 0,
-            "y": 12
+            "y": 3
           },
+          "description": "Spans per 30s showing the collector is processing traces from microservices",
           "targets": [
             {
-              "expr": "microservices_otelcol_processor_batch_size_count{}",
-              "legendFormat": "{{processor}}"
+              "expr": "rate(container_cpu_usage_seconds_total{namespace=\"microservices\", container=\"otel-collector\"}[1m])",
+              "legendFormat": "Collector CPU"
             }
-          ]
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "cores"
+            }
+          }
         },
         {
           "type": "timeseries",
-          "title": "gRPC Metrics Received Per Service",
+          "title": "Collector Memory",
           "gridPos": {
-            "h": 8,
+            "h": 6,
             "w": 12,
             "x": 12,
-            "y": 12
+            "y": 3
           },
           "targets": [
             {
-              "expr": "sum(rate(microservices_http_server_request_count{}[5m])) by (service_name)",
-              "legendFormat": "{{service_name}}"
+              "expr": "container_memory_working_set_bytes{namespace=\"microservices\", container=\"otel-collector\"}",
+              "legendFormat": "Memory"
             }
-          ]
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "bytes"
+            }
+          }
         }
       ]
     }
