@@ -55,6 +55,18 @@ delete_k8s_resources() {
   kubectl delete secret ecr-secret -n kube-system 2>/dev/null || true
   kubectl delete deployment aws-load-balancer-controller -n kube-system 2>/dev/null || true
   kubectl delete serviceaccount aws-load-balancer-controller -n kube-system 2>/dev/null || true
+
+  if kubectl get namespace argocd &>/dev/null; then
+    log_info "Deleting ArgoCD resources..."
+    kubectl delete application -n argocd --all 2>/dev/null || true
+    sleep 5
+    helm uninstall argocd -n argocd 2>/dev/null || true
+    kubectl delete namespace argocd --timeout=120s 2>/dev/null || true
+    while kubectl get namespace argocd &>/dev/null; do
+      sleep 3
+    done
+    log_info "✓ ArgoCD removed"
+  fi
 }
 
 destroy_terraform() {

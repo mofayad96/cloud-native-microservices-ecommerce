@@ -144,20 +144,46 @@ verify_ecr_images() {
   log_info "✓ All images present"
 }
 
-deploy_microservices() {
-  log_step "Phase 4: Deploy Microservices"
+install_argocd() {
+  log_step "Phase 4: Install ArgoCD"
+
+  if kubectl get deployment -n argocd argocd-server &>/dev/null; then
+    log_info "ArgoCD already installed"
+  else
+    helm repo add argo https://argoproj.github.io/argo-helm 2>/dev/null || true
+    helm upgrade --install argocd argo/argo-cd -n argocd --create-namespace --set server.service.type=ClusterIP
+    log_info "Waiting for ArgoCD to be ready..."
+    kubectl rollout status deployment -n argocd argocd-server --timeout=180s
+  fi
+}
+
+deploy_shared_resources() {
+  log_step "Phase 5: Deploy Shared Resources"
 
   kubectl apply -f "$SCRIPT_DIR/k8s/base/namespace.yaml" 2>/dev/null || true
+  kubectl apply -f "$SCRIPT_DIR/k8s/base/common-config.yaml" 2>/dev/null || true
+  kubectl create configmap -n "$NAMESPACE" microservices-env \
+    --from-literal=AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)" \
+    --from-literal=AWS_REGION="$AWS_REGION" \
+    --from-literal=CLUSTER_NAME="$CLUSTER_NAME" \
+    --dry-run=client -o yaml | kubectl apply -f - 2>/dev/null || true
+}
 
-  log_info "Deploying via Kustomize..."
-  kubectl apply -k "$SCRIPT_DIR/k8s/base/"
+deploy_argocd_apps() {
+  log_step "Phase 6: Apply ArgoCD Applications"
 
-  log_info "Waiting for rollouts..."
-  local deployments
-  deployments=$(kubectl get deployments -n "$NAMESPACE" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null)
-  for dep in $deployments; do
-    log_info "  Waiting for $dep..."
-    kubectl rollout status "deployment/$dep" -n "$NAMESPACE" --timeout=5m 2>/dev/null || log_warn "  Timeout waiting for $dep"
+  kubectl apply -f "$SCRIPT_DIR/k8s/parent-argocd.yaml"
+
+  log_info "Waiting for ArgoCD to sync microservices..."
+  for i in $(seq 1 24); do
+    sleep 15
+    local unhealthy
+    unhealthy=$(kubectl get application -n argocd --no-headers 2>/dev/null | grep -vc "Healthy" || true)
+    if [[ "$unhealthy" -le 1 ]]; then
+      log_info "✓ All applications healthy"
+      break
+    fi
+    log_info "  Waiting... ($unhealthy apps not healthy)"
   done
 }
 
@@ -190,6 +216,9 @@ print_summary() {
     echo -e "\n${GREEN}Frontend (ALB Ingress):${NC} http://$ingress_url"
   fi
 
+  echo -e "\n${GREEN}ArgoCD UI:${NC} kubectl port-forward svc/argocd-server -n argocd 8080:443"
+  echo -e "${GREEN}ArgoCD Password:${NC} kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | base64 -d"
+
   echo -e "\n${GREEN}To configure kubectl:${NC}"
   echo "  aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME"
 }
@@ -211,7 +240,9 @@ main() {
     check_cluster
     install_lb_controller
     verify_ecr_images
-    deploy_microservices
+    install_argocd
+    deploy_shared_resources
+    deploy_argocd_apps
     print_summary
   fi
 
