@@ -162,6 +162,7 @@ deploy_shared_resources() {
 
   kubectl apply -f "$SCRIPT_DIR/k8s/base/namespace.yaml" 2>/dev/null || true
   kubectl apply -f "$SCRIPT_DIR/k8s/base/common-config.yaml" 2>/dev/null || true
+  kubectl apply -k "$SCRIPT_DIR/k8s/base/observability" 2>/dev/null || true
   kubectl create configmap -n "$NAMESPACE" microservices-env \
     --from-literal=AWS_ACCOUNT_ID="$(aws sts get-caller-identity --query Account --output text)" \
     --from-literal=AWS_REGION="$AWS_REGION" \
