@@ -1,8 +1,8 @@
 # S3 backend for Terraform state
-# Migration steps:
+# Steps to activate:
 #   1. terraform init                    (starts with local state)
 #   2. terraform apply                   (creates S3 bucket + DynamoDB table)
-#   3. Uncomment the backend block below
+#   3. Uncomment below
 #   4. terraform init -migrate-state     (migrates to S3)
 #
 # terraform {

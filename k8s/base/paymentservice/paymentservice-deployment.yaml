@@ -24,6 +24,12 @@ spec:
       - name: paymentservice-pod
         image: paymentservice
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
         ports:
         - containerPort: 50051
         env:
@@ -68,6 +74,12 @@ spec:
           periodSeconds: 5
           timeoutSeconds: 5
           failureThreshold: 2
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
       imagePullSecrets:
         - name: ecr-secret
 ---

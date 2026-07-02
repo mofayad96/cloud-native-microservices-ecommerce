@@ -30,7 +30,11 @@ spec:
         image: frontend:latest
         imagePullPolicy: IfNotPresent
         securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
           readOnlyRootFilesystem: true
+          runAsNonRoot: true
         ports:
         - containerPort: 8080
           name: http

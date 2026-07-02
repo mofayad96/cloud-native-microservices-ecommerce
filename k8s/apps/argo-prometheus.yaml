@@ -17,7 +17,7 @@ spec:
           enabled: false
         grafana:
           enabled: true
-          adminPassword: "admin123"
+          adminPassword: "admin123"  # Change this! Use sealed-secrets or external-secrets for production
           service:
             type: ClusterIP
           ingress:

@@ -20,6 +20,11 @@ spec:
         image: otel/opentelemetry-collector-contrib:0.100.0
         args:
           - --config=/conf/collector-config.yaml
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: ["ALL"]
+          runAsNonRoot: true
         ports:
           - containerPort: 4317
             name: otlp-grpc
@@ -27,6 +32,27 @@ spec:
             name: otlp-http
           - containerPort: 8889
             name: prometheus
+          - containerPort: 13133
+            name: health
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+          initialDelaySeconds: 5
+          periodSeconds: 10
         volumeMounts:
           - name: collector-config
             mountPath: /conf
@@ -61,4 +87,8 @@ spec:
     - name: prometheus
       port: 8889
       targetPort: 8889
+      protocol: TCP
+    - name: health
+      port: 13133
+      targetPort: 13133
       protocol: TCP

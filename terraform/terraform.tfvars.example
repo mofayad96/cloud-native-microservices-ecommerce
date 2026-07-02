@@ -1,0 +1,24 @@
+
+aws_region = "eu-central-1"
+
+
+cluster_name    = "microservices-cluster"
+cluster_version = "1.31"
+environment     = "production"
+
+
+vpc_cidr = "10.0.0.0/16"
+
+node_instance_type = "m7i-flex.large"
+node_desired_size  = 2
+node_min_size      = 2
+node_max_size      = 4
+
+# CloudWatch Logging
+log_retention_days = 7
+
+
+tags = {
+  Project   = "Microservices"
+  ManagedBy = "Terraform"
+}
