@@ -34,13 +34,16 @@ spec:
           capabilities:
             drop: ["ALL"]
           readOnlyRootFilesystem: true
-                  ports:
+        ports:
         - containerPort: 8080
           name: http
           protocol: TCP
         env:
         - name: PORT
-          value: "8080"
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: PORT
         - name: PRODUCT_CATALOG_SERVICE_ADDR
           valueFrom:
             configMapKeyRef:
@@ -97,21 +100,45 @@ spec:
               name: microservices-config
               key: COLLECTOR_SERVICE_ADDR
         - name: OTEL_SERVICE_NAME
-          value: "frontend"
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: OTEL_SERVICE_NAME
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://otel-collector.microservices.svc.cluster.local:4317"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
         - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          value: "grpc"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_EXPORTER_OTLP_PROTOCOL
         - name: OTEL_TRACES_EXPORTER
-          value: "otlp"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_TRACES_EXPORTER
         - name: OTEL_METRICS_EXPORTER
-          value: "otlp"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_METRICS_EXPORTER
         - name: OTEL_LOGS_EXPORTER
-          value: "none"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_LOGS_EXPORTER
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.namespace=microservices,deployment.environment=production"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_RESOURCE_ATTRIBUTES
         - name: ENABLE_PROFILER
-          value: "0"
+          valueFrom:
+            configMapKeyRef:
+              name: frontend-config
+              key: ENABLE_PROFILER
         resources:
           requests:
             cpu: 200m

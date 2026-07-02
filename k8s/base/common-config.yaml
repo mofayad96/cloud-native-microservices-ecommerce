@@ -23,3 +23,11 @@ data:
   # Observability
   DISABLE_PROFILER: "1"
   ENABLE_TRACING: "1"
+
+  # OpenTelemetry Shared Settings
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.microservices.svc.cluster.local:4317"
+  OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+  OTEL_TRACES_EXPORTER: "otlp"
+  OTEL_METRICS_EXPORTER: "otlp"
+  OTEL_LOGS_EXPORTER: "none"
+  OTEL_RESOURCE_ATTRIBUTES: "service.namespace=microservices,deployment.environment=production"

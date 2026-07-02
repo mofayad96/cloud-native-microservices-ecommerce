@@ -34,13 +34,16 @@ spec:
           capabilities:
             drop: ["ALL"]
           readOnlyRootFilesystem: true
-                  ports:
+        ports:
         - containerPort: 8080
           name: http
           protocol: TCP
         env:
         - name: PORT
-          value: "8080"
+          valueFrom:
+            configMapKeyRef:
+              name: emailservice-config
+              key: PORT
         - name: DISABLE_PROFILER
           valueFrom:
             configMapKeyRef:
@@ -52,19 +55,40 @@ spec:
               name: microservices-config
               key: ENABLE_TRACING
         - name: OTEL_SERVICE_NAME
-          value: "emailservice"
+          valueFrom:
+            configMapKeyRef:
+              name: emailservice-config
+              key: OTEL_SERVICE_NAME
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://otel-collector.microservices.svc.cluster.local:4317"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
         - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          value: "grpc"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_EXPORTER_OTLP_PROTOCOL
         - name: OTEL_TRACES_EXPORTER
-          value: "otlp"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_TRACES_EXPORTER
         - name: OTEL_METRICS_EXPORTER
-          value: "otlp"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_METRICS_EXPORTER
         - name: OTEL_LOGS_EXPORTER
-          value: "none"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_LOGS_EXPORTER
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.namespace=microservices,deployment.environment=production"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_RESOURCE_ATTRIBUTES
         resources:
           requests:
             cpu: 100m

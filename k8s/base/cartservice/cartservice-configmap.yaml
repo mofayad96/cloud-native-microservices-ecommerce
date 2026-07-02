@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cartservice-config
+  namespace: microservices
+data:
+  ASPNETCORE_URLS: "http://*:7070"
+  OTEL_SERVICE_NAME: "cartservice"

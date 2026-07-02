@@ -34,39 +34,90 @@ spec:
         - containerPort: 5050
         env:
         - name: PORT
-          value: "5050"
+          valueFrom:
+            configMapKeyRef:
+              name: checkoutservice-config
+              key: PORT
         - name: PRODUCT_CATALOG_SERVICE_ADDR
-          value: "productcatalog-service:3550"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: PRODUCT_CATALOG_SERVICE_ADDR
         - name: SHIPPING_SERVICE_ADDR
-          value: "shippingservice-service:50052" 
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: SHIPPING_SERVICE_ADDR
         - name: CURRENCY_SERVICE_ADDR
-          value: "currencyservice-service:7000"  
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: CURRENCY_SERVICE_ADDR
         - name: PAYMENT_SERVICE_ADDR
-          value: "paymentservice-service:50051"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: PAYMENT_SERVICE_ADDR
         - name: EMAIL_SERVICE_ADDR
-          value: "emailservice-service:8082"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: EMAIL_SERVICE_ADDR
         - name: CART_SERVICE_ADDR
-          value: "cartservice-service:7070"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: CART_SERVICE_ADDR
         - name: DISABLE_PROFILER
-          value: "1"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: DISABLE_PROFILER
         - name: ENABLE_TRACING
-          value: "1"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: ENABLE_TRACING
         - name: COLLECTOR_SERVICE_ADDR
-          value: "otel-collector.microservices.svc.cluster.local:4317"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: COLLECTOR_SERVICE_ADDR
         - name: OTEL_SERVICE_NAME
-          value: "checkoutservice"
+          valueFrom:
+            configMapKeyRef:
+              name: checkoutservice-config
+              key: OTEL_SERVICE_NAME
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
-          value: "http://otel-collector.microservices.svc.cluster.local:4317"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_EXPORTER_OTLP_ENDPOINT
         - name: OTEL_EXPORTER_OTLP_PROTOCOL
-          value: "grpc"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_EXPORTER_OTLP_PROTOCOL
         - name: OTEL_TRACES_EXPORTER
-          value: "otlp"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_TRACES_EXPORTER
         - name: OTEL_METRICS_EXPORTER
-          value: "otlp"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_METRICS_EXPORTER
         - name: OTEL_LOGS_EXPORTER
-          value: "none"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_LOGS_EXPORTER
         - name: OTEL_RESOURCE_ATTRIBUTES
-          value: "service.namespace=microservices,deployment.environment=production"
+          valueFrom:
+            configMapKeyRef:
+              name: microservices-config
+              key: OTEL_RESOURCE_ATTRIBUTES
         resources:
           requests:
             cpu: 100m
