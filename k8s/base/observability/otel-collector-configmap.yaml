@@ -19,6 +19,11 @@ data:
     exporters:
       logging:
         loglevel: info
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        namespace: microservices
+        resource_to_telemetry_conversion:
+          enabled: true
 
     service:
       pipelines:
@@ -26,3 +31,7 @@ data:
           receivers: [otlp]
           processors: [batch]
           exporters: [logging]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [prometheus]

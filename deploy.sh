@@ -173,6 +173,7 @@ deploy_argocd_apps() {
   log_step "Phase 6: Apply ArgoCD Applications"
 
   kubectl apply -f "$SCRIPT_DIR/k8s/parent-argocd.yaml"
+  kubectl apply -f "$SCRIPT_DIR/k8s/apps/argo-monitoring-addons.yaml"
 
   log_info "Waiting for ArgoCD to sync microservices..."
   for i in $(seq 1 24); do
@@ -243,9 +244,16 @@ print_summary() {
   echo -e "${GREEN}ArgoCD Password:${NC} kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | base64 -d"
 
   if kubectl get ns monitoring &>/dev/null; then
-    echo -e "\n${GREEN}Grafana:${NC} kubectl port-forward svc/prom-grafana -n monitoring 3000:80"
+    echo -e "\n${GREEN}Grafana:${NC} kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80"
     echo -e "${GREEN}Grafana Password:${NC} admin / admin123"
     echo -e "${GREEN}Prometheus:${NC} kubectl port-forward svc/kube-prometheus-stack-prometheus -n monitoring 9090:9090"
+
+    if kubectl get configmap -n monitoring dash-overview &>/dev/null; then
+      echo -e "\n${GREEN}Custom Dashboards:${NC}"
+      echo -e "  ${GREEN}• Microservices Golden Signals${NC} (UID: microservices-golden-signals)"
+      echo -e "  ${GREEN}• Service Detail${NC} (UID: service-detail)"
+      echo -e "  ${GREEN}• OTEL Pipeline Health${NC} (UID: otel-pipeline-health)"
+    fi
   fi
 
   echo -e "\n${GREEN}To configure kubectl:${NC}"
