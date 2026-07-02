@@ -34,8 +34,7 @@ spec:
           capabilities:
             drop: ["ALL"]
           readOnlyRootFilesystem: true
-          runAsNonRoot: true
-        ports:
+                  ports:
         - containerPort: 8080
           name: http
           protocol: TCP

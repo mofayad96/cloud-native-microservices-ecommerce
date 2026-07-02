@@ -29,8 +29,7 @@ spec:
           capabilities:
             drop: ["ALL"]
           readOnlyRootFilesystem: true
-          runAsNonRoot: true
-
+          
         ports:
         - containerPort: 5050
         env:

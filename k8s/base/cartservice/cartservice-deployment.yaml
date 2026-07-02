@@ -25,8 +25,6 @@ spec:
 
     spec:
       serviceAccountName: default
-      securityContext:
-        runAsNonRoot: true
       containers:
       - name: cartservice
         image: cartservice:latest
@@ -36,8 +34,7 @@ spec:
           capabilities:
             drop: ["ALL"]
           readOnlyRootFilesystem: true
-          runAsNonRoot: true
-        ports:
+                  ports:
         - containerPort: 7070
           name: grpc
           protocol: TCP

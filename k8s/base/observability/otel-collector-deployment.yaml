@@ -24,7 +24,6 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
-          runAsNonRoot: true
         ports:
           - containerPort: 4317
             name: otlp-grpc

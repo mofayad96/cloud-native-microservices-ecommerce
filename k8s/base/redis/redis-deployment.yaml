@@ -20,8 +20,7 @@ spec:
       serviceAccountName: default
       securityContext:
         fsGroup: 999
-        runAsNonRoot: true
-        runAsUser: 999
+                runAsUser: 999
       containers:
       - name: redis
         image: redis:7-alpine
@@ -30,8 +29,7 @@ spec:
           allowPrivilegeEscalation: false
           capabilities:
             drop: ["ALL"]
-          runAsNonRoot: true
-        ports:
+                  ports:
         - containerPort: 6379
           name: redis
           protocol: TCP
