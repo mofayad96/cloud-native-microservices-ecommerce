@@ -7,7 +7,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/mofayad96/google-microservicesDemo-devops-.git
+    repoURL: https://github.com/mofayad96/cloud-native-microservices-ecommerce.git
     targetRevision: main
     path: k8s/base/checkoutservice
 
