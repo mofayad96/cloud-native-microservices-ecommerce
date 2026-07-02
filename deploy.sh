@@ -179,11 +179,34 @@ deploy_argocd_apps() {
     sleep 15
     local unhealthy
     unhealthy=$(kubectl get application -n argocd --no-headers 2>/dev/null | grep -vc "Healthy" || true)
-    if [[ "$unhealthy" -le 1 ]]; then
+    if [[ "$unhealthy" -le 2 ]]; then
       log_info "✓ All applications healthy"
       break
     fi
     log_info "  Waiting... ($unhealthy apps not healthy)"
+  done
+}
+
+wait_for_monitoring() {
+  log_step "Phase 7: Wait for Monitoring Stack"
+
+  if ! kubectl get application -n argocd prometheus &>/dev/null; then
+    log_info "Prometheus app not yet discovered by ArgoCD, skipping"
+    return
+  fi
+
+  log_info "Waiting for Prometheus/Grafana pods to be ready..."
+  for i in $(seq 1 18); do
+    sleep 10
+    local ready
+    ready=$(kubectl get pods -n monitoring --no-headers 2>/dev/null | grep -c "Running" || true)
+    local total
+    total=$(kubectl get pods -n monitoring --no-headers 2>/dev/null | wc -l || true)
+    if [[ "$total" -gt 0 ]] && [[ "$ready" -eq "$total" ]]; then
+      log_info "✓ All $total monitoring pods running"
+      return
+    fi
+    log_info "  Waiting... ($ready/$total pods running)"
   done
 }
 
@@ -219,6 +242,12 @@ print_summary() {
   echo -e "\n${GREEN}ArgoCD UI:${NC} kubectl port-forward svc/argocd-server -n argocd 8080:443"
   echo -e "${GREEN}ArgoCD Password:${NC} kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | base64 -d"
 
+  if kubectl get ns monitoring &>/dev/null; then
+    echo -e "\n${GREEN}Grafana:${NC} kubectl port-forward svc/prom-grafana -n monitoring 3000:80"
+    echo -e "${GREEN}Grafana Password:${NC} admin / admin123"
+    echo -e "${GREEN}Prometheus:${NC} kubectl port-forward svc/kube-prometheus-stack-prometheus -n monitoring 9090:9090"
+  fi
+
   echo -e "\n${GREEN}To configure kubectl:${NC}"
   echo "  aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME"
 }
@@ -243,6 +272,7 @@ main() {
     install_argocd
     deploy_shared_resources
     deploy_argocd_apps
+    wait_for_monitoring
     print_summary
   fi
 

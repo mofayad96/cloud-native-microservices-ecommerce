@@ -67,6 +67,17 @@ delete_k8s_resources() {
     done
     log_info "✓ ArgoCD removed"
   fi
+
+  if kubectl get namespace monitoring &>/dev/null; then
+    log_info "Deleting monitoring namespace..."
+    kubectl delete application prometheus -n argocd 2>/dev/null || true
+    sleep 3
+    kubectl delete namespace monitoring --timeout=120s 2>/dev/null || true
+    while kubectl get namespace monitoring &>/dev/null; do
+      sleep 3
+    done
+    log_info "✓ Monitoring namespace deleted"
+  fi
 }
 
 destroy_terraform() {
