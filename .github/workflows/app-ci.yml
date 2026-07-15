@@ -1,0 +1,89 @@
+name: Application CI-CD
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/**"
+
+permissions:
+  contents: write
+
+jobs:
+  detect_changes:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Filter service changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            adservice: 'src/adservice/**'
+            cartservice: 'src/cartservice/**'
+            checkoutservice: 'src/checkoutservice/**'
+            currencyservice: 'src/currencyservice/**'
+            emailservice: 'src/emailservice/**'
+            frontend: 'src/frontend/**'
+            paymentservice: 'src/paymentservice/**'
+            productcatalogservice: 'src/productcatalogservice/**'
+            recommendationservice: 'src/recommendationservice/**'
+            shippingservice: 'src/shippingservice/**'
+
+  build:
+    needs: detect_changes
+    if: needs.detect_changes.outputs.services != '[]' && needs.detect_changes.outputs.services != ''
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect_changes.outputs.services) }}
+    uses: ./.github/workflows/reusable-app-build.yml
+    with:
+      service_name: ${{ matrix.service }}
+      service_path: src/${{ matrix.service }}
+    secrets: inherit
+
+  promote-gitops:
+    needs: [detect_changes, build]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && needs.detect_changes.outputs.services != '[]' && needs.detect_changes.outputs.services != ''
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Kustomize Image Tags
+        run: |
+          SERVICES='${{ needs.detect_changes.outputs.services }}'
+          SHA='${{ github.sha }}'
+          
+          # Parse JSON array in bash and update images
+          for service in $(echo "$SERVICES" | jq -r '.[]'); do
+            echo "Promoting image tag for $service to SHA: $SHA"
+            yq eval -i '(.images[] | select(.name == "'"$service"'")).newTag = "'"$SHA"'"' k8s/overlays/prod/kustomization.yaml
+          done
+
+      - name: Commit and Push GitOps promotion
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/overlays/prod/kustomization.yaml
+          
+          if git diff --cached --quiet; then
+            echo "No image tag changes detected in overlays."
+          else
+            git commit -m "chore(gitops): promote image tags to $SHA [skip ci]"
+            git push origin main
+          fi

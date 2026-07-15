@@ -2,7 +2,7 @@
 // It configures the cluster with public and private endpoint access, security group rules for worker nodes, and enables logging. The node groups are set up with specified instance types and scaling parameters, and additional IAM policies for pulling images from ECR.
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 19.0"
+  version = "~> 20.0"
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
@@ -13,8 +13,9 @@ module "eks" {
   cluster_endpoint_private_access      = true
   cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
 
-  manage_aws_auth_configmap = false
-
+  # Enable EKS Access Entry API for direct IAM administration (replaces aws-auth)
+  authentication_mode                      = "API_AND_CONFIG_MAP"
+  enable_cluster_creator_admin_permissions = true
 
   create_cloudwatch_log_group = true
 
@@ -29,35 +30,18 @@ module "eks" {
   eks_managed_node_group_defaults = {
     ami_type       = "AL2023_x86_64_STANDARD"
     instance_types = [var.node_instance_type]
-    disk_size      = 50
     capacity_type  = "ON_DEMAND"
-  }
-
-  # Node security group rules
-  node_security_group_additional_rules = {
-    ingress_cluster_all = {
-      description                   = "Allow all control plane traffic to worker nodes"
-      protocol                      = "-1"
-      from_port                     = 0
-      to_port                       = 0
-      type                          = "ingress"
-      source_cluster_security_group = true
-    }
-    egress_all = {
-      description = "Allow all outbound traffic from node"
-      protocol    = "-1"
-      from_port   = 0
-      to_port     = 65535
-      type        = "egress"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-    ingress_self_all = {
-      description = "Allow nodes to talk to each other"
-      protocol    = "-1"
-      from_port   = 0
-      to_port     = 65535
-      type        = "ingress"
-      self        = true
+    
+    # Configure GP3 root volume via block device mappings
+    block_device_mappings = {
+      xvda = {
+        device_name = "/dev/xvda"
+        ebs = {
+          volume_size           = 50
+          volume_type           = "gp3"
+          delete_on_termination = true
+        }
+      }
     }
   }
 
@@ -87,7 +71,6 @@ module "eks" {
     }
   }
   cluster_addons = {} # Addons managed separately in eks-addons.tf
-
 
   cluster_enabled_log_types = local.eks_log_types
 

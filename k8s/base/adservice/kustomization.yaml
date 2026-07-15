@@ -5,7 +5,3 @@ resources:
   - adservice-configmap.yaml
   - adservice-deployment.yaml
 
-images:
-  - name: adservice
-    newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/adservice
-    newTag: latest

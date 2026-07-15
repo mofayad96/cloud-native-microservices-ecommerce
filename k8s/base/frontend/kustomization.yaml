@@ -5,8 +5,3 @@ resources:
   - frontend-configmap.yaml
   - frontend-deployment.yaml
   - frontend-ingress.yaml
-
-images:
-  - name: frontend
-    newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/frontend
-    newTag: latest

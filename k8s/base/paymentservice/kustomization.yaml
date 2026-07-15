@@ -5,7 +5,3 @@ resources:
   - paymentservice-configmap.yaml
   - paymentservice-deployment.yaml
 
-images:
-  - name: paymentservice
-    newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/paymentservice
-    newTag: latest

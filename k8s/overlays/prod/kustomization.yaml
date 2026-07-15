@@ -1,7 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+namespace: microservices
+
 resources:
+  - ../../base/namespace.yaml
+  - ../../base/common-config.yaml
+  - ../../base/network-policy.yaml
+  - ../../base/observability
   - ../../base/adservice
   - ../../base/cartservice
   - ../../base/checkoutservice
@@ -13,47 +19,49 @@ resources:
   - ../../base/recommendationservice  
   - ../../base/shippingservice  
   - ../../base/redis 
+
+commonLabels:
+  environment: production
+  app.kubernetes.io/managed-by: argocd
+
 images:
   - name: adservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/adservice
     newTag: latest
-
   - name: cartservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/cartservice
     newTag: latest
-
   - name: checkoutservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/checkoutservice
     newTag: latest
-
   - name: currencyservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/currencyservice
     newTag: latest
-
   - name: emailservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/emailservice
     newTag: latest
-
   - name: frontend
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/frontend
     newTag: latest
-
   - name: paymentservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/paymentservice
     newTag: latest
-
   - name: productcatalogservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/productcatalogservice
     newTag: latest
-
   - name: recommendationservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/recommendationservice
     newTag: latest
-
   - name: shippingservice
     newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/shippingservice
     newTag: latest
-
   - name: redis
     newName: redis
     newTag: 7-alpine
+
+configMapGenerator:
+  - name: microservices-env
+    literals:
+      - AWS_ACCOUNT_ID=184574354202
+      - AWS_REGION=eu-central-1
+      - CLUSTER_NAME=microservices-cluster

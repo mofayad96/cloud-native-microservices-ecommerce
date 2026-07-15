@@ -168,8 +168,6 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
-      imagePullSecrets:
-        - name: ecr-secret
 ---
 apiVersion: v1
 kind: Service

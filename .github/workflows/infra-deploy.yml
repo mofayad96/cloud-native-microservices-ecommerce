@@ -1,0 +1,43 @@
+name: Infrastructure Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      # Configure AWS credentials for apply phase
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Initialize Terraform
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      # Run Terraform Apply
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve

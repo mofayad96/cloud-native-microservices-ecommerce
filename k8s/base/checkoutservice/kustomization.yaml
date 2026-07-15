@@ -5,7 +5,3 @@ resources:
   - checkoutservice-configmap.yaml
   - checkoutservice-deployment.yaml
 
-images:
-  - name: checkoutservice
-    newName: 184574354202.dkr.ecr.eu-central-1.amazonaws.com/checkoutservice
-    newTag: latest

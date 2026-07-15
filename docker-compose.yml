@@ -18,7 +18,7 @@ services:
       - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
       - SHIPPING_SERVICE_ADDR=shippingservice:50051
       - AD_SERVICE_ADDR=adservice:9555
-      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:8080
+      
       - ENABLE_PROFILER=0
       - ENABLE_TRACING=0
       - DISABLE_PROFILER=1
@@ -30,7 +30,6 @@ services:
       - checkoutservice
       - shippingservice
       - adservice
-      - shoppingassistantservice
     restart: unless-stopped
 
   # Product Catalog Service - Go
@@ -178,20 +177,7 @@ services:
       - cartservice
     restart: unless-stopped
 
-  # Shopping Assistant Service - Python
-  shoppingassistantservice:
-    build:
-      context: ./src/shoppingassistantservice
-      dockerfile: Dockerfile
-    image: deaddeal96/shoppingassistantservice:latest
-    ports:
-      - "8083:8080"
-    environment:
-      - PORT=8080
-      - DISABLE_PROFILER=1
-      - ENABLE_TRACING=0
-    restart: unless-stopped
-
+ 
   # Load Generator - Python
   loadgenerator:
     build:

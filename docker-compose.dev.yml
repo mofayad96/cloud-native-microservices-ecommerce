@@ -19,7 +19,7 @@ services:
       - CHECKOUT_SERVICE_ADDR=checkoutservice:5050
       - SHIPPING_SERVICE_ADDR=shippingservice:50051
       - AD_SERVICE_ADDR=adservice:9555
-      - SHOPPING_ASSISTANT_SERVICE_ADDR=shoppingassistantservice:8080
+  
       - DISABLE_PROFILER=1
       - ENABLE_TRACING=0
     depends_on:
@@ -102,20 +102,7 @@ services:
       - ENABLE_TRACING=0
     restart: unless-stopped
 
-  # Shopping Assistant Service - Python 
-  # shoppingassistantservice:
-  #   build:
-  #     context: ./src/shoppingassistantservice
-  #     dockerfile: Dockerfile
-  #   image: microservices-demo/shoppingassistantservice:dev
-  #   ports:
-  #     - "8083:8080"
-  #   environment:
-  #     - PORT=8080
-  #     - DISABLE_PROFILER=1
-  #     - ENABLE_TRACING=0
-  #   restart: unless-stopped
-
+  
   # Redis - For cart service
   redis:
     image: redis:7-alpine
