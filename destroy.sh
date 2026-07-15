@@ -93,6 +93,41 @@ destroy_terraform() {
 
   cd "$SCRIPT_DIR/terraform"
 
+  # Migrate backend to local to prevent S3 bucket lock/deletion deadlock
+  log_info "Checking backend configuration..."
+  if grep -q 'backend "s3"' backend.tf; then
+    log_warn "Active S3 backend detected. Migrating state to local to allow clean resource deletion..."
+    cp backend.tf backend.tf.backup
+    cat << 'EOF' > backend.tf
+# terraform {
+#    backend "s3" {
+#      bucket         = "google-microservices-terraform-state"
+#      key            = "microservices/terraform.tfstate"
+#      region         = "eu-central-1"
+#      encrypt        = true
+#      dynamodb_table = "terraform-state-lock"
+#    }
+#  }
+EOF
+    terraform init -migrate-state -force-copy -lock=false || true
+  fi
+
+  # Empty the S3 bucket so it can be deleted by Terraform
+  local bucket_name="google-microservices-terraform-state"
+  if aws s3api head-bucket --bucket "$bucket_name" 2>/dev/null; then
+    log_info "Emptying S3 bucket $bucket_name before destruction..."
+    local versions
+    versions=$(aws s3api list-object-versions --bucket "$bucket_name" --output json --query '{Objects: Versions[].{Key:Key,VersionId:VersionId}}' 2>/dev/null || echo "")
+    if [[ -n "$versions" && "$versions" != "null" && "$versions" != "{\"Objects\":null}" ]]; then
+      aws s3api delete-objects --bucket "$bucket_name" --delete "$versions" >/dev/null 2>&1 || true
+    fi
+    local markers
+    markers=$(aws s3api list-object-versions --bucket "$bucket_name" --output json --query '{Objects: DeleteMarkers[].{Key:Key,VersionId:VersionId}}' 2>/dev/null || echo "")
+    if [[ -n "$markers" && "$markers" != "null" && "$markers" != "{\"Objects\":null}" ]]; then
+      aws s3api delete-objects --bucket "$bucket_name" --delete "$markers" >/dev/null 2>&1 || true
+    fi
+  fi
+
   local approve_flag=""
   if [[ "$AUTO_APPROVE" == "true" ]]; then
     approve_flag="-auto-approve"
@@ -102,6 +137,11 @@ destroy_terraform() {
   fi
 
   terraform destroy $approve_flag
+
+  # Restore backend.tf
+  if [[ -f backend.tf.backup ]]; then
+    mv backend.tf.backup backend.tf
+  fi
 
   cd "$SCRIPT_DIR"
   log_info "✓ Infrastructure destroyed"
