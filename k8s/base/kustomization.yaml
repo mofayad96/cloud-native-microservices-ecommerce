@@ -8,6 +8,7 @@ resources:
   - common-config.yaml
   - network-policies-hardened.yaml
   - serviceaccounts.yaml
+  - storageclass-gp3.yaml
   - observability
   - adservice
   - cartservice

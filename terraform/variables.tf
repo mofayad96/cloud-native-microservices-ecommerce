@@ -29,7 +29,7 @@ variable "cluster_endpoint_public_access" {
 variable "cluster_endpoint_public_access_cidrs" {
   description = "CIDR blocks allowed to access the public EKS API endpoint. WARNING: 0.0.0.0/0 allows anyone. Set to your office/VPN CIDR."
   type        = list(string)
-  default     = ["10.0.0.0/16"]
+  default     = ["0.0.0.0/0"]
 }
 
 variable "cluster_version" {
