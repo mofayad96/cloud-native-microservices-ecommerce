@@ -1,12 +1,19 @@
-# Cloud-Native Microservices E-Commerce: Production-Grade DevOps Portfolio
+# 🛒 Cloud-Native EKS Microservices Platform
 
-A production-grade, highly secure, and observable deployment of the Google Cloud microservices demo on AWS EKS. This project has been engineered to showcase enterprise DevOps best practices, featuring a complete GitOps pipeline, advanced Kubernetes hardening, infrastructure as code (IaC), supply chain security, and a full OpenTelemetry observability stack.
+[![Terraform](https://img.shields.io/badge/IaC-Terraform%201.5%2B-7B42BC?logo=terraform)](https://www.terraform.io/)
+[![Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes%201.31-326CE5?logo=kubernetes)](https://kubernetes.io/)
+[![AWS EKS](https://img.shields.io/badge/AWS-EKS-FF9900?logo=amazon-aws)](https://aws.amazon.com/eks/)
+[![ArgoCD](https://img.shields.io/badge/GitOps-Argo%20CD-FF512F?logo=argo)](https://argoproj.github.io/cd/)
+[![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions)](https://github.com/features/actions)
+[![Security Scan](https://img.shields.io/badge/Security-Trivy%20%7C%20Hadolint-4B275F?logo=security)](https://github.com/aquasecurity/trivy)
+
+A production-grade, highly secure, and observable deployment of the 10-service Google Cloud microservices demo on **Amazon EKS**. Engineered to showcase enterprise DevOps best practices, this platform integrates automated **GitOps pipelines**, comprehensive **Kubernetes hardening**, **Infrastructure as Code (IaC)**, and **full-stack observability**.
 
 ---
 
 ## 🏗️ Architecture Overview
 
-The application is an online boutique consisting of 10 microservices communicating via gRPC/HTTP:
+The system is a polyglot e-commerce application consisting of 10 microservices communicating via gRPC/HTTP:
 
 ```mermaid
 graph TD
@@ -39,22 +46,36 @@ graph TD
 
 ---
 
-## 🛠️ Tech Stack & Key Features
+## 🛠️ Features & Enterprise Best Practices
 
-*   **Infrastructure as Code (IaC):** Modular Terraform 1.5+ utilizing AWS EKS Module v20 (with Access Entry API enabled) and secure S3/DynamoDB state locking.
-*   **GitOps:** ArgoCD utilizing the **App-of-Apps** pattern. Microservices are consolidated into a single application definition overlaying a registry-agnostic base.
-*   **CI/CD Pipelines:** GitHub Actions featuring:
-    *   Change detection (only builds modified services)
-    *   Hadolint (Dockerfile linting) & Trivy (Container security scans)
-    *   SHA-based image promotion to AWS ECR
-    *   Automated GitOps tag updates via automated commits
-*   **Kubernetes Hardening:**
-    *   Dedicated, least-privilege IAM Roles for Service Accounts (IRSA)
-    *   Horizontal Pod Autoscalers (HPA) & Pod Disruption Budgets (PDB)
-    *   StatefulSet deployment for Redis cache with stable networking
-    *   Calico network policies for pod-level isolation
-    *   Pod Topology Spread Constraints for high availability (HA)
-*   **Observability:** Full OpenTelemetry integration tracing requests via Grafana Tempo, logs via Grafana Loki, and metrics via Prometheus/Grafana.
+### 1. Infrastructure as Code (IaC)
+- **Modular Terraform:** Provisioned a custom VPC, EKS cluster (v20+ module), security groups, subnets, and IAM roles.
+- **State Security:** Integrated S3 Remote State storage with DynamoDB state locking and AES-256 encryption.
+- **Access Entry API:** Leveraged the modern AWS EKS Access Entry API for programmatic IAM authentication.
+
+### 2. GitOps & CI/CD Pipelines
+- **ArgoCD App-of-Apps:** Consolidated deployments using a parent application root, enabling multi-service management with automated drift detection and self-healing.
+- **Smart Path Filtering:** GitHub Actions only builds and tests services that have changes inside their respective `src/` directory.
+- **GitOps Tag Promotion:** On successful merges, the CI pipeline automatically updates the production overlay with the commit SHA and pushes the tag update back to git.
+
+### 3. Kubernetes Hardening (Zero-Trust)
+- **Pod-Level Isolation:** Deployed **13 isolated NetworkPolicies** implementing a default-deny ingress/egress posture.
+- **Least-Privilege RBAC:** Assigned dedicated Kubernetes ServiceAccounts to every service.
+- **High Availability (HA):** Configured Pod Topology Spread Constraints across Availability Zones (AZs).
+- **Graceful Scaling:** Added Horizontal Pod Autoscalers (HPA) and Pod Disruption Budgets (PDB) to safeguard application availability.
+- **Stateful Persistence:** Converted Redis cache into a StatefulSet with stable network identity backed by a custom AWS EBS `gp3` StorageClass.
+
+### 4. Supply Chain Security & Gating
+- **Container Linting:** Integrated Hadolint into the pull request pipelines to enforce Dockerfile best practices.
+- **Vulnerability Gating:** Trivy scans container images for vulnerabilities, failing the CI build on `CRITICAL` findings.
+- **SBOM Generation:** Syft creates Software Bill of Materials (SBOM) for auditability.
+
+### 5. Full-Stack Observability
+- **Distributed Tracing:** OpenTelemetry Collector deployment configured to capture, process, and export traces and metrics.
+- **Prometheus & Grafana:** Pre-packaged monitoring stack with custom dashboards monitoring:
+  * Golden Signals (Latency, Traffic, Errors, Saturation)
+  * OTEL Pipeline Health
+  * Microservice Service Details
 
 ---
 
@@ -78,48 +99,41 @@ graph TD
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Deployment Guide
 
 ### Prerequisites
+* AWS Account & AWS CLI configured
+* Terraform `>= 1.5.0`
+* `kubectl` & `helm`
 
-*   AWS CLI & Account configured with Admin access
-*   Terraform `>= 1.5.0`
-*   `kubectl` & `helm`
-
-### 1. Provision Infrastructure
-
-1. Navigate to the `terraform` directory:
-   ```bash
-   cd terraform
-   ```
-2. Initialize Terraform (local backend is used first to bootstrap S3/DynamoDB):
-   ```bash
-   terraform init
-   ```
-3. Apply the bootstrap configuration to create the state resources:
-   ```bash
-   terraform apply -target=aws_s3_bucket.terraform_state -target=aws_dynamodb_table.terraform_locks
-   ```
-4. Migrate the state to S3 (uncomment the `backend` block in `backend.tf`):
-   ```bash
-   terraform init -migrate-state
-   ```
-5. Apply the rest of the infrastructure:
-   ```bash
-   terraform apply
-   ```
-
-### 2. Configure GitOps (ArgoCD)
-
-The cluster uses the App-of-Apps pattern. Deploy the parent application to bootstrap all microservices:
+### 1. One-Click Deployment
+To bootstrap the entire infrastructure (VPC, EKS, ECR registries, EBS CSI drivers), apply Kubernetes manifests, configure ArgoCD, and deploy the monitoring stack, run:
 ```bash
-kubectl apply -f k8s/parent-argocd.yaml
+bash deploy.sh
 ```
+
+### 2. Accessing the Platform
+
+| Service | Access Method | Credentials |
+| :--- | :--- | :--- |
+| **Frontend Application** | Open Ingress URL printed in console (Port 80) | None |
+| **ArgoCD Dashboard** | Run port-forward: `kubectl port-forward svc/argocd-server -n argocd 8080:443` | User: `admin`<br>Password: Run `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" \| base64 -d` |
+| **Grafana** | Run port-forward: `kubectl port-forward svc/prometheus-grafana -n monitoring 3000:80` | User: `admin`<br>Password: `admin123` |
+| **Prometheus** | Run port-forward: `kubectl port-forward svc/kube-prometheus-stack-prometheus -n monitoring 9090:9090` | None |
 
 ---
 
-## 🔒 Security Standards
+## 🛠️ Operational Runbook & Troubleshooting
 
-1.  **Zero-Trust Network Policies:** All services default to `deny-all` and must explicitly whitelist incoming gRPC/HTTP traffic.
-2.  **No Leaked State/Secrets:** AWS Account IDs are completely parameterized. EKS Node IAM Roles handle ECR image pulls natively, eliminating fragile 12-hour registry credentials.
-3.  **Vulnerability Gates:** Hadolint scans Dockerfiles and Trivy scans build images. If any `CRITICAL` vulnerability is detected, the CI workflow immediately blocks the release.
+### EKS Access Issues ("Unauthorized")
+If `kubectl` returns `Unauthorized` when running commands on a newly spun-up cluster, EKS is missing an Access Entry for your active AWS CLI profile. Add your profile's IAM User/Role to EKS:
+```bash
+aws eks create-access-entry --cluster-name microservices-cluster --principal-arn <YOUR_IAM_PRINCIPAL_ARN>
+aws eks associate-access-policy --cluster-name microservices-cluster --principal-arn <YOUR_IAM_PRINCIPAL_ARN> --policy-arn arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy --access-scope type=cluster
+```
+
+### Cleanup
+To destroy all provisioned infrastructure and release AWS resources safely, run:
+```bash
+bash destroy.sh
+```
