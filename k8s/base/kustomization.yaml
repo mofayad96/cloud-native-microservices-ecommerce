@@ -6,7 +6,7 @@ namespace: microservices
 resources:
   - namespace.yaml
   - common-config.yaml
-  - network-policy.yaml
+  - network-policies-hardened.yaml
   - serviceaccounts.yaml
   - observability
   - adservice

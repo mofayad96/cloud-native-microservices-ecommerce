@@ -4,21 +4,9 @@ kind: Kustomization
 namespace: microservices
 
 resources:
-  - ../../base/namespace.yaml
-  - ../../base/common-config.yaml
-  - ../../base/network-policy.yaml
-  - ../../base/observability
-  - ../../base/adservice
-  - ../../base/cartservice
-  - ../../base/checkoutservice
-  - ../../base/currencyservice
-  - ../../base/emailservice
-  - ../../base/frontend
-  - ../../base/paymentservice
-  - ../../base/productcatalogservice  
-  - ../../base/recommendationservice  
-  - ../../base/shippingservice  
-  - ../../base/redis 
+  - ../../base
+  - hpa.yaml
+  - pdb.yaml
 
 commonLabels:
   environment: production
