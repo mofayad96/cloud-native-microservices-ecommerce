@@ -19,7 +19,14 @@ spec:
         app: checkoutservice
 
     spec:
-      serviceAccountName: default
+      serviceAccountName: checkoutservice
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: checkoutservice
       containers:
       - name: checkoutservice-pod
         image: checkoutservice

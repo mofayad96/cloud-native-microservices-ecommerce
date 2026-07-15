@@ -19,7 +19,14 @@ spec:
         app: paymentservice
 
     spec:
-      serviceAccountName: default
+      serviceAccountName: paymentservice
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: paymentservice
       containers:
       - name: paymentservice-pod
         image: paymentservice

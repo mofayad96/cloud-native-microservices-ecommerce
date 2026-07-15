@@ -1,0 +1,109 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: adservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: adservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cartservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: cartservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: checkoutservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: checkoutservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: currencyservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: currencyservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: emailservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: emailservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: frontend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: paymentservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: paymentservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: productcatalog-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: productcatalog
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: recommendationservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: recommendationservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: shippingservice-pdb
+  namespace: microservices
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: shippingservice
