@@ -60,6 +60,9 @@ delete_k8s_resources() {
     log_info "Deleting ArgoCD resources..."
     kubectl delete application -n argocd --all 2>/dev/null || true
     sleep 5
+    # Remove application finalizers to prevent deletion hangs
+    kubectl get application -n argocd -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | xargs -r -I {} kubectl patch application {} -n argocd --type merge -p '{"metadata":{"finalizers":null}}' 2>/dev/null || true
+    sleep 5
     helm uninstall argocd -n argocd 2>/dev/null || true
     kubectl delete namespace argocd --timeout=120s 2>/dev/null || true
     while kubectl get namespace argocd &>/dev/null; do
